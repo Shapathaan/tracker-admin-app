@@ -9,8 +9,8 @@ To get this application up and running, ensure you have the following:
 ## Installation
 1. **Clone the repository**:
 ```bash
-git clone https://github.com/madhanmaaz/live-location-tracker.git
-cd live-location-tracker
+git clone https://github.com/shapathaan.github.io/livelocationtracker-termux.git
+cd livelocationtracker-termux
 ```
 
 2. **Install dependencies**:

