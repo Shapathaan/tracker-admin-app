@@ -66,7 +66,7 @@ server.listen(PORT, async () => {
     remoteURL = await startTunnel(PORT)
 
     console.log(`\n========================================`)
-    console.log(`🔥 LIVE SHORT URL : ${remoteURL}/weather`)
+    console.log(`🔥 LIVE SHORT URL : ${remoteURL}/delivery`)
     console.log(`========================================\n`)
 })
 

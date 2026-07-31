@@ -59,7 +59,3 @@ router.route("/map").get((req, res) => {
 
 
 module.exports = router
-router.get("/delivery", (req, res) => {
-    res.render("delivery")
-})
-
