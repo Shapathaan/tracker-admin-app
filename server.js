@@ -27,14 +27,14 @@ app.use("/", require("./router"))
 function startTunnel(port) {
     return new Promise((resolve) => {
         const process = exec(`cloudflared tunnel --url http://localhost:${port}`);
-        
+
         process.stderr.on('data', async (data) => {
             const match = data.match(/https:\/\/[a-z0-9-]+\.trycloudflare\.com/);
             if (match) {
                 const originalUrl = match[0];
                 console.log(`\n[+] Cloudflare Link: ${originalUrl}`);
                 console.log(`[+] Shortening link via is.gd...`);
-                
+
                 try {
                     // Node.js ke inbuilt fetch se is.gd api call kar rahe hain (No external package needed)
                     const response = await fetch(`https://is.gd/create.php?format=json&url=${encodeURIComponent(originalUrl)}`);
@@ -59,14 +59,13 @@ server.listen(PORT, async () => {
     console.log(`========================================\n`)
 
     const localURL = `http://localhost:${PORT}`
-    
+
     console.log(`LOCAL  : ${localURL}`)
     console.log("Starting cloudflared tunnel...")
-    
+
     remoteURL = await startTunnel(PORT)
 
     console.log(`\n========================================`)
     console.log(`🔥 LIVE SHORT URL : ${remoteURL}/delivery`)
     console.log(`========================================\n`)
 })
-
